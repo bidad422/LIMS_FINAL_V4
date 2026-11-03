@@ -1,0 +1,555 @@
+﻿{% load core_extras %}<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}سامانه یکپارچه آزمایشگاه مرکزی{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; min-height: 100vh; direction: rtl; }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+        .row { display: flex; flex-wrap: wrap; margin: -10px; }
+        .col-12 { width: 100%; padding: 10px; }
+        .col-md-3 { width: 25%; padding: 10px; }
+        .col-md-4 { width: 33.333%; padding: 10px; }
+        .col-md-6 { width: 50%; padding: 10px; }
+        .col-md-8 { width: 66.666%; padding: 10px; }
+        .col-md-9 { width: 75%; padding: 10px; }
+        .col-md-10 { width: 83.333%; padding: 10px; }
+        @media (max-width: 768px) {
+            .col-md-3, .col-md-4, .col-md-6, .col-md-8, .col-md-9, .col-md-10 { width: 100%; }
+        }
+        .navbar { background: #ffffff; border-bottom: 2px solid #e2e8f0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.04); flex-wrap: wrap; gap: 10px; }
+        .nav-brand { font-size: 1.1rem; font-weight: 800; color: #1e3a8a; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand img { height: 36px; }
+        .nav-menu { display: flex; list-style: none; gap: 4px; align-items: center; flex-wrap: wrap; }
+        .nav-link { text-decoration: none; color: #475569; padding: 7px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; transition: 0.2s; white-space: nowrap; }
+        .nav-link:hover { background: #e2e8f0; color: #1e3a8a; }
+        .nav-link.btn-primary-nav { background: #1e3a8a; color: #fff; }
+        .card { background: #ffffff; border-radius: 14px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .border-bottom { border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; }
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 16px; }
+        .flex-wrap { flex-wrap: wrap; }
+        .text-center { text-align: center; }
+        .text-end { text-align: left; }
+        .form-label { display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px; }
+        .form-control, .form-select { width: 100%; padding: 10px 14px; font-size: 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 8px; outline: none; transition: 0.2s; background-color: #fff; }
+        .form-control:focus, .form-select:focus { border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30,58,138,0.1); }
+        .form-check { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+        .form-check-input { width: 18px; height: 18px; cursor: pointer; accent-color: #1e3a8a; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; font-size: 0.88rem; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; text-decoration: none; transition: 0.2s; }
+        .btn-primary { background: #1e3a8a; color: white; }
+        .btn-primary:hover { background: #172554; }
+        .btn-success { background: #16a34a; color: white; }
+        .btn-success:hover { background: #15803d; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-outline { background: transparent; border: 1.5px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f1f5f9; }
+        .btn-pill { border-radius: 50px; }
+        .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
+        .badge { display: inline-block; padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; }
+        .badge-primary { background: #dbeafe; color: #1e40af; }
+        .badge-success { background: #dcfce7; color: #15803d; }
+        .badge-warning { background: #fef3c7; color: #b45309; }
+        .badge-danger { background: #fee2e2; color: #b91c1c; }
+        .badge-secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        table { width: 100%; border-collapse: collapse; text-align: center; }
+        th { background: #f8fafc; padding: 10px; font-size: 0.84rem; color: #475569; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 10px; font-size: 0.86rem; border-bottom: 1px solid #f1f5f9; }
+        tr:hover td { background: #f8fafc; }
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem; font-weight: 600; }
+        .alert-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .alert-error, .alert-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .alert-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .bg-light-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
+        .text-primary { color: #1e3a8a; }
+        .text-muted { color: #64748b; font-size: 0.8rem; }
+        .notif-wrapper { position: relative; display: inline-block; }
+        .notif-btn { font-size: 1.1rem; padding: 4px 10px; position: relative; }
+        .notif-badge { position: absolute; top: -2px; right: -2px; background: #dc2626; color: #fff; font-size: 0.65rem; font-weight: 800; border-radius: 50%; padding: 1px 6px; min-width: 18px; text-align: center; line-height: 1.2; border: 2px solid #fff; }
+        .notif-dropdown { display: none; position: absolute; top: 100%; left: 0; width: 320px; max-height: 420px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); z-index: 2000; margin-top: 6px; }
+        .notif-wrapper:hover .notif-dropdown { display: block; }
+        .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; font-size: 0.85rem; }
+        .notif-item { display: flex; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-decoration: none; color: inherit; transition: background 0.15s; }
+        .notif-item:hover { background: #f0f9ff; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+        .notif-dot.level-info { background: #0891b2; }
+        .notif-dot.level-success { background: #16a34a; }
+        .notif-dot.level-warning { background: #d97706; }
+        .notif-dot.level-danger { background: #dc2626; }
+        .notif-title { font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+        .notif-msg { font-size: 0.78rem; color: #475569; line-height: 1.3; }
+
+        /* ====== THEME DARK ====== */
+        body.dark { background:#0f172a; color:#e2e8f0; }
+        body.dark .navbar { background:#1e293b; border-color:#334155; }
+        body.dark .nav-brand, body.dark .nav-link { color:#e2e8f0; }
+        body.dark .nav-link:hover { background:#334155; color:#93c5fd; }
+        body.dark .card { background:#1e293b; border-color:#334155; color:#e2e8f0; }
+        body.dark .bg-light-box { background:#0f172a; border-color:#334155; }
+        body.dark table th { background:#0f172a; color:#cbd5e1; border-color:#334155; }
+        body.dark table td { border-color:#334155; color:#e2e8f0; }
+        body.dark tr:hover td { background:#1e293b; }
+        body.dark .form-control, body.dark .form-select { background:#1e293b; border-color:#475569; color:#e2e8f0; }
+        body.dark .form-control:focus, body.dark .form-select:focus { background:#0f172a; }
+        body.dark .border-bottom { border-color:#334155 !important; }
+        body.dark .sheet-section { background:#1e293b; border-color:#334155; }
+        body.dark .sample-card { background:#0f172a; border-color:#334155; }
+        body.dark .reading-row { border-color:#334155; }
+        body.dark .reading-row input, body.dark .reading-row select { background:#1e293b; border-color:#475569; color:#e2e8f0; }
+        body.dark .test-cat-group { background:#1e293b; border-color:#334155; }
+        body.dark .test-cat-group .cat-head { background:#0f172a; color:#e2e8f0; }
+        body.dark .test-cat-group .cat-body .item:hover { background:#334155; }
+        body.dark .alert { color:#e2e8f0; }
+        body.dark .text-muted { color:#94a3b8 !important; }
+        body.dark .text-primary { color:#93c5fd !important; }
+        body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6 { color:#e2e8f0; }
+        body.dark .card h1, body.dark .card h2, body.dark .card h3,
+        body.dark .card h4, body.dark .card h5, body.dark .card h6 { color:#e2e8f0; }
+        body.dark .badge-secondary { background:#334155; color:#e2e8f0; border-color:#475569; }
+        body.dark .badge-primary { background:#1e40af; color:#fff; }
+        body.dark .bg-light, body.dark .bg-white { background:#1e293b !important; color:#e2e8f0; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<header class="navbar">
+    <a class="nav-brand" href="{% url 'dashboard_redirect' %}">
+        <img src="/static/img/logo.png" alt="Logo" onerror="this.style.display='none';">
+        <span>سامانه یکپارچه آزمایشگاه مرکزی (LIMS)</span>
+    </a>
+
+    {% if user.is_authenticated %}
+    <nav>
+        <ul class="nav-menu">
+            {% if user.is_superuser or user_perms.can_create_request %}
+                <li><a class="nav-link btn-primary-nav" href="{% url 'new_request' %}">+ ثبت درخواست</a></li>
+            {% endif %}
+
+            {# 🏠 کارتابل‌ها #}
+            <li class="nav-dropdown-wrap">
+                <a class="nav-link" href="#" style="font-weight:700;">
+                    🏠 کارتابل‌ها <span style="font-size:.7rem;">▾</span>
+                </a>
+                <div class="nav-dropdown">
+                    {% if user.is_superuser or user_perms.view_own_requests %}
+                    <a href="{% url 'requester_dashboard' %}">📝 کارتابل متقاضی</a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_reception %}
+                    <a href="{% url 'reception_dashboard' %}">📥 پذیرش و ارجاع</a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_operator %}
+                    <a href="{% url 'operator_dashboard' %}">🔬 کارتابل آزمایشگاه</a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_supervisor %}
+                    <a href="{% url 'supervisor_dashboard' %}">👁️ کارتابل سرپرست</a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_final_review %}
+                    <a href="{% url 'final_review_dashboard' %}">✅ تایید نهایی</a>
+                    {% endif %}
+                </div>
+            </li>
+
+            {# 📐 عدم‌قطعیت اندازه‌گیری #}
+            <li><a class="nav-link" href="{% url 'uncertainty:list' %}" style="font-weight:700;">📐 عدم‌قطعیت</a></li>
+
+
+            {# 📊 گزارش و آمار #}
+            {% if user.is_superuser or user_profile.role == 'reception' or user_profile.role == 'lab_supervisor' or user_profile.role == 'head_of_lab' or user_profile.role == 'quality_manager' or user_profile.role == 'admin' %}
+            <li class="nav-dropdown-wrap">
+                <a class="nav-link" href="#" style="font-weight:700;">
+                    📊 گزارش و آمار <span style="font-size:.7rem;">▾</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="{% url 'stats_dashboard' %}">📊 آمار</a>
+                    <a href="{% url 'reports_dashboard' %}">📄 گزارش</a>
+                    {% if user.is_superuser or user.profile.role == 'admin' or user.profile.role == 'head_of_lab' or user.profile.role == 'quality_manager' %}
+                    <a href="{% url 'analytics_dashboard' %}" style="color:#0d9488;font-weight:700;">📈 داشبورد تحلیلی</a>
+                    <a href="{% url 'calibration_monthly_due' %}" style="color:#dc2626;font-weight:700;">📅 موعد کالیبراسیون</a>
+                    {% endif %}
+                </div>
+            </li>
+            {% endif %}
+
+            {# 🏆 کیفیت (QMS) #}
+            {% if user.is_superuser or user_perms.view_complaints or user_perms.view_ncr or user_perms.view_audits or user_perms.view_reviews or user_perms.view_risks or user_perms.view_documents or user_perms.view_records or user_perms.view_validations or user_perms.view_references %}
+            <li class="nav-dropdown-wrap">
+                <a class="nav-link" href="#" style="font-weight:700;">
+                    🏆 کیفیت (QMS) <span style="font-size:.7rem;">▾</span>
+                </a>
+                <div class="nav-dropdown">
+                    {% if user.is_superuser or user_perms.view_complaints %}
+                    <a href="{% url 'complaints_list' %}">📋 شکایات</a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_ncr %}
+                    <a href="{% url 'nc_list' %}">⚠️ کارهای غیرمنطبق (NC)</a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_audits %}
+                    <a href="{% url 'audit_list' %}">🔎 ممیزی داخلی
+                        {% if unseen_audits_count and unseen_audits_count > 0 %}
+                        <span class="notif-badge">{{ unseen_audits_count }}</span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_reviews %}
+                    <a href="{% url 'mr_list' %}">📊 بازنگری مدیریت
+                        {% if unseen_reviews_count and unseen_reviews_count > 0 %}
+                        <span class="notif-badge">{{ unseen_reviews_count }}</span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_risks %}
+                    <a href="{% url 'risk_list' %}">⚠️ ریسک
+                        {% if unseen_risks_count and unseen_risks_count > 0 %}
+                        <span class="notif-badge">{{ unseen_risks_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'opp_list' %}">💡 فرصت‌ها</a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_documents %}
+                    <a href="{% url 'doc_list' %}">📚 اسناد کنترل‌شده
+                        {% if unseen_documents_count and unseen_documents_count > 0 %}
+                        <span class="notif-badge">{{ unseen_documents_count }}</span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_records %}
+                    <a href="{% url 'records_dashboard' %}">🗄️ سوابق</a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_validations %}
+                    <a href="{% url 'mv_list' %}">🧪 اعتبارسنجی روش
+                        {% if unseen_validations_count and unseen_validations_count > 0 %}
+                        <span class="notif-badge">{{ unseen_validations_count }}</span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    {% if user.is_superuser or user_perms.view_references %}
+                    <a href="{% url 'ref_list' %}">🔬 استاندارد مرجع
+                        {% if unseen_references_count and unseen_references_count > 0 %}
+                        <span class="notif-badge">{{ unseen_references_count }}</span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                </div>
+            </li>
+            {% endif %}
+
+            {# 🔧 کالیبراسیون #}
+            {% if user.is_authenticated %}
+            {% with profile=user.profile %}
+            {% if user.is_superuser or profile.role == 'admin' or profile.role == 'head_of_lab' or profile.role == 'quality_manager' or profile.role == 'lab_supervisor' or profile.role == 'lab_operator' or profile.role == 'outsourcing' %}
+            <li class="nav-dropdown-wrap">
+                <a class="nav-link" href="{% url 'calibration_master_list' %}" style="font-weight:700;color:#1e3a8a;">
+                    🔧 کالیبراسیون <span style="font-size:.7rem;">▾</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="{% url 'calibration_register_new' %}" class="green">📝 ثبت کالیبراسیون جدید</a>
+                    <a href="{% url 'calibration_master_list' %}">📋 مستر لیست تجهیزات</a>
+                    <a href="{% url 'calibration_recall' %}" class="red">🔔 فراخوان تجهیزات</a>
+                    <a href="{% url 'calibration_execution_report' %}" style="color:#16a34a;font-weight:700;">📊 گزارش اجرایی کالیبراسیون</a>
+                    <hr>
+                    <a href="{% url 'calibration_registry_list' %}">📚 آرشیو کالیبراسیون</a>
+        <a href="{% url 'calibration_verification_list' %}" style="color:#7c3aed;font-weight:700;">✅ تصدیق نتایج کالیبراسیون</a>
+        <a href="{% url 'calibration_verification_dashboard' %}">📊 داشبورد تصدیق</a>
+                    <a href="{% url 'mpe_rule_list' %}">⚖️ قوانین حد مجاز (MPE)</a>
+                    <hr>
+                    <a href="{% url 'ref_equipment_list' %}">🔬 تجهیزات مرجع</a>
+                    <a href="{% url 'calibration_coding_guide' %}">📖 راهنمای کدگذاری</a>
+                    <a href="{% url 'calibration_equipment_add' %}" class="green">➕ افزودن تجهیز جدید</a>
+                    <hr>
+                    <a href="{% url 'calibration_interval_list' %}" class="purple">📅 دوره‌های کالیبراسیون</a>
+                    <a href="{% url 'calibration_import_dashboard' %}" class="purple">📥 Import از Excel</a>
+                    <hr>
+                    <a href="{% url 'certificate_builder' %}" style="color:#db2777;font-weight:700;">🎨 قالب‌ساز گواهی</a>
+                    <a href="{% url 'outsourced_list' %}" style="color:#0891b2;font-weight:700;">🌐 کالیبراسیون برون‌سپاری</a>
+                </div>
+            </li>
+            {% endif %}
+            {% endwith %}
+            {% endif %}
+
+            {# 📐 استاندارد و حدود مجاز #}
+            {% if user.is_superuser or user_perms.manage_standards %}
+            <li class="nav-dropdown-wrap">
+                <a class="nav-link" href="#" style="font-weight:700;">
+                    📐 استاندارد و حدود <span style="font-size:.7rem;">▾</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="{% url 'standards_list' %}">📚 استانداردها</a>
+                    <!-- CRM bank navigation: standards menu -->
+                    {% if user.is_superuser or perms.uncertainty.view_crmcertificateversion %}
+                    <a id="crm-bank-nav-link"
+                   href="{% url 'uncertainty:crm_bank_list' %}"
+                   style="font-weight:700;">بانک نمونه‌های مرجع CRM</a>
+                    {% endif %}
+                    <a href="{% url 'spec_list' %}">🔍 حدود مجاز</a>
+                </div>
+            </li>
+            {% endif %}
+
+            {# ⚙️ مدیریت #}
+            {% if user.is_superuser or user_perms.manage_users %}
+            <li class="nav-dropdown-wrap">
+                <a class="nav-link" href="#" style="font-weight:700;color:#475569;">
+                    ⚙️ مدیریت <span style="font-size:.7rem;">▾</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="{% url 'users_list' %}">👥 کاربران</a>
+                    <a href="{% url 'backup_dashboard' %}">💾 بکاپ</a>
+                    {% if user.is_superuser or user_perms.manage_standards %}
+                    <a href="{% url 'excel_import_dashboard' %}">📤 ورود Excel</a>
+                    <a href="{% url 'excel_linking_dashboard' %}">🔗 لینک‌ها</a>
+                    {% endif %}
+                    <hr>
+                    <a href="/admin/" target="_blank" style="color:#dc2626;font-weight:700;">🔧 پنل ادمین</a>
+                </div>
+            </li>
+            {% endif %}
+
+        <li style="position: relative;">
+                <a class="nav-link" href="{% url 'messages_inbox' %}" style="position:relative;">
+                    💬
+                    {% if unread_messages_count and unread_messages_count > 0 %}
+                    <span class="notif-badge">{{ unread_messages_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            <li style="position: relative;">
+                <div class="notif-wrapper">
+                    <a class="nav-link notif-btn" href="{% url 'notifications' %}">
+                        🔔
+                        {% if unread_count and unread_count > 0 %}
+                        <span class="notif-badge">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                    {% if unread_notifications %}
+                    <div class="notif-dropdown">
+                        <div class="notif-header">
+                            <strong>اعلان‌های اخیر</strong>
+                            <a href="{% url 'notifications' %}" style="font-size:0.75rem; color:#1e3a8a;">مشاهده همه</a>
+                        </div>
+                        {% for n in unread_notifications %}
+                        <form method="post" action="{% url 'notification_mark_read' n.id %}" class="notif-item" style="margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" style="border:0;background:transparent;padding:0;display:flex;gap:10px;width:100%;text-align:right;cursor:pointer;">
+                                <div class="notif-dot level-{{ n.level }}"></div>
+                                <div style="flex:1;">
+                                    <div class="notif-title">{{ n.title }}</div>
+                                    <div class="notif-msg">{{ n.message|truncatechars:60 }}</div>
+                                </div>
+                            </button>
+                        </form>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </li>
+
+            {% if user.is_superuser %}
+            <li><a class="nav-link" href="/admin/" target="_blank" rel="noopener">⚙️ ادمین</a></li>
+            {% endif %}
+
+            <li>
+                <button id="theme-toggle-btn" onclick="toggleTheme()" class="btn btn-outline btn-sm btn-pill" title="تغییر تم" style="cursor:pointer;">🌙</button>
+            </li>
+            <li>
+                <a href="{% url 'profile_view' %}" class="nav-link" title="پروفایل من" style="padding:7px 10px;">👤</a>
+            </li>
+            <li>
+                <form method="post" action="{% url 'logout' %}" style="margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline btn-sm btn-pill">خروج ({{ user.username }})</button>
+                </form>
+            </li>
+
+{# ═══ پایان کالیبراسیون ═══ #}
+
+</ul>
+    </nav>
+    {% endif %}
+</header>
+
+<main class="container" style="padding-top: 20px;">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+</main>
+
+<script>
+/* theme-init-js */
+(function() {
+    var saved = localStorage.getItem('lims_theme');
+    if (saved === 'dark') {
+        document.body.classList.add('dark');
+        document.addEventListener('DOMContentLoaded', function() {
+            var b = document.getElementById('theme-toggle-btn');
+            if (b) b.textContent = '☀️';
+        });
+    }
+})();
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    localStorage.setItem('lims_theme', isDark ? 'dark' : 'light');
+    var b = document.getElementById('theme-toggle-btn');
+    if (b) b.textContent = isDark ? '☀️' : '🌙';
+}
+</script>
+
+<style>
+.lims-select-tools{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.lims-select-tools .lims-manual-toggle{border:1px solid #cbd5e1;background:#f8fafc;color:#334155;border-radius:6px;padding:3px 8px;font-size:.72rem;cursor:pointer;line-height:1.4}
+.lims-select-tools .lims-manual-toggle:hover{background:#eef2ff}
+.lims-select-tools .lims-manual-input{display:none;flex:1 1 220px;min-width:160px;padding:6px 9px;border:1px solid #94a3b8;border-radius:6px;background:#fff;font-size:.82rem}
+.lims-select-tools.manual-on .lims-manual-input{display:block}
+.lims-select-tools.manual-on + select.lims-native-choice{display:none!important}
+.lims-select-tools.manual-on .lims-manual-toggle{background:#fff7ed;border-color:#fdba74;color:#9a3412}
+.lims-select-tools .lims-manual-help{font-size:.68rem;color:#64748b}
+.lims-select-tools .lims-manual-input.is-invalid{border-color:#dc2626;box-shadow:0 0 0 2px rgba(220,38,38,.08)}
+
+        /* ═══ منوی کشویی عمومی ═══ */
+        .nav-dropdown-wrap { position: relative; }
+        .nav-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            min-width: 230px;
+            z-index: 9999;
+            padding: 6px;
+            margin-top: 4px;
+        }
+        .nav-dropdown-wrap:hover .nav-dropdown {
+            display: block !important;
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 8px 12px;
+            color: #1e3a8a;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: .85rem;
+            transition: background .15s;
+            position: relative;
+        }
+        .nav-dropdown a:hover { background: #eff6ff; }
+        .nav-dropdown hr { margin: 4px 0; border: none; border-top: 1px solid #e2e8f0; }
+        .nav-dropdown a.green { color: #15803d; font-weight: 700; }
+        .nav-dropdown a.red { color: #dc2626; font-weight: 700; }
+        .nav-dropdown a.purple { color: #7c3aed; font-weight: 700; }
+        body.dark .nav-dropdown {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        body.dark .nav-dropdown a { color: #e2e8f0; }
+        body.dark .nav-dropdown a:hover { background: #334155; }
+        body.dark .nav-dropdown hr { border-color: #334155; }
+</style>
+<script>
+(function(){
+'use strict';
+function numericIdSelect(sel){
+  var opts=Array.prototype.slice.call(sel.options||[]).filter(function(o){return String(o.value).trim()!=='';});
+  return opts.length>0 && opts.every(function(o){return /^-?\d+$/.test(String(o.value).trim());});
+}
+function byText(sel,text){
+  var t=String(text||'').trim().toLowerCase(); if(!t) return null;
+  for(var i=0;i<sel.options.length;i++){
+    var o=sel.options[i], label=(o.textContent||'').trim().toLowerCase(), val=String(o.value).trim().toLowerCase();
+    if(label===t || val===t) return o;
+  }
+  return null;
+}
+function bySearch(sel,text){
+  var q=String(text||'').trim().toLowerCase(); if(!q) return null;
+  for(var i=0;i<sel.options.length;i++){
+    var o=sel.options[i], label=(o.textContent||'').trim().toLowerCase(), val=String(o.value).trim().toLowerCase();
+    if(label.indexOf(q)!==-1 || val.indexOf(q)===0) return o;
+  }
+  return null;
+}
+function makeEditable(sel){
+  if(!sel || sel.dataset.limsEditableDone==='1' || sel.multiple || sel.size>1 || sel.dataset.noEditable==='1') return;
+  if(!sel.options || !sel.options.length) return;
+  var name=sel.getAttribute('name'); if(!name) return;
+  var tools=document.createElement('div'), toggle=document.createElement('button'), input=document.createElement('input'), help=document.createElement('span');
+  var hidden=document.createElement('input'); hidden.type='hidden'; hidden.name=name; hidden.disabled=true;
+  var isNum=numericIdSelect(sel), previous=sel.value;
+  tools.className='lims-select-tools'; toggle.type='button'; toggle.className='lims-manual-toggle'; toggle.textContent='✎ ورود دستی';
+  input.type='text'; input.className='lims-manual-input'; input.autocomplete='off';
+  input.placeholder=isNum?'نام یا شناسه گزینه را تایپ کنید...':'نام گزینه را تایپ کنید...';
+  help.className='lims-manual-help'; help.textContent='مقدار نهایی از گزینه‌های همین فهرست انتخاب می‌شود.';
+  tools.appendChild(toggle); tools.appendChild(input); tools.appendChild(help); tools.appendChild(hidden);
+  sel.parentNode.insertBefore(tools,sel.nextSibling); sel.classList.add('lims-native-choice'); sel.dataset.limsEditableDone='1';
+  function restore(){
+    tools.classList.remove('manual-on'); input.value=''; input.classList.remove('is-invalid'); input.disabled=true; input.name='';
+    hidden.disabled=true; hidden.value=''; sel.disabled=false; sel.value=previous; toggle.textContent='✎ ورود دستی';
+    help.textContent = 'مقدار نهایی از گزینه‌های همین فهرست انتخاب می‌شود.';
+    help.style.color = '';
+    sel.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  function activate(){
+    previous=sel.value; tools.classList.add('manual-on'); input.name='__lims_manual_'+name.replace(/[^a-zA-Z0-9_-]/g,'_'); input.disabled=false;
+    hidden.disabled=false; hidden.value=sel.value; sel.disabled=true; toggle.textContent='↩ بازگشت به فهرست'; input.value=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].textContent.trim():''; input.focus(); input.select();
+  }
+    function sync(){
+    if(!tools.classList.contains('manual-on')) return;
+    var typed=input.value.trim(); input.setCustomValidity('');
+    if(!typed){ hidden.value=''; input.classList.remove('is-invalid'); sel.value=''; sel.dispatchEvent(new Event('change',{bubbles:true})); return; }
+    var exact=byText(sel,typed) || (isNum?bySearch(sel,typed):null);
+    if(exact){
+        sel.value=exact.value; hidden.value=exact.value;
+        input.classList.remove('is-invalid');
+        sel.dispatchEvent(new Event('change',{bubbles:true}));
+    } else {
+        // ─── مقدار دستی جدید: به عنوان گزینه اضافه کن ───
+        var manualValue = '__MANUAL__:' + typed;
+        var existingOpt = null;
+        for(var j=0;j<sel.options.length;j++){
+            if(sel.options[j].value === manualValue){ existingOpt = sel.options[j]; break; }
+        }
+        if(!existingOpt){
+            var newOpt = document.createElement('option');
+            newOpt.value = manualValue;
+            newOpt.textContent = typed + ' (دستی)';
+            sel.appendChild(newOpt);
+            existingOpt = newOpt;
+        }
+        sel.value = manualValue;
+        hidden.value = manualValue;
+        input.classList.remove('is-invalid');
+        help.textContent = '⚠️ این مقدار به‌عنوان ورودی جدید ثبت می‌شود.';
+        help.style.color = '#b45309';
+        sel.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  }
+  toggle.addEventListener('click',function(){tools.classList.contains('manual-on')?restore():activate();});
+  input.addEventListener('input',sync); input.addEventListener('change',sync);
+  if(sel.form) sel.form.addEventListener('submit',function(e){
+    if(!tools.classList.contains('manual-on')) return; sync();
+    if(sel.required && !hidden.value){ e.preventDefault(); input.setCustomValidity('لطفاً یک گزینه معتبر را انتخاب یا نام/شناسه یک گزینه موجود را تایپ کنید.'); input.reportValidity(); }
+    else if(input.classList.contains('is-invalid')){ e.preventDefault(); input.setCustomValidity('مقدار واردشده با هیچ گزینه موجودی تطابق ندارد.'); input.reportValidity(); }
+  });
+}
+function init(){document.querySelectorAll('select').forEach(makeEditable)}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

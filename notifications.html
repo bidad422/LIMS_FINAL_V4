@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load core_extras %}
+{% block title %}اعلان‌ها{% endblock %}
+{% block content %}
+<style>
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin-bottom:20px; }
+    .stat-card { background:#fff; border-radius:12px; padding:16px 18px; border:1px solid #e2e8f0; transition:.2s; }
+    .stat-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+    .stat-card .lbl { font-size:.75rem; color:#64748b; font-weight:700; margin-bottom:6px; }
+    .stat-card .val { font-size:1.7rem; font-weight:900; line-height:1; }
+    .filter-bar { background:#fff; border-radius:12px; padding:14px 18px; border:1px solid #e2e8f0; margin-bottom:20px; }
+    .filter-bar label { display:block; font-size:.75rem; color:#475569; font-weight:700; margin-bottom:4px; }
+    .filter-bar input, .filter-bar select { padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:.85rem; }
+
+    .notif-item {
+        background:#fff; border-radius:12px; padding:16px 18px; margin-bottom:10px;
+        border:1px solid #e2e8f0; display:flex; gap:14px; align-items:flex-start;
+        transition:.15s; position:relative;
+    }
+    .notif-item:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); }
+    .notif-item.unread { border-right:4px solid #1e3a8a; background:#f8fafc; }
+    .notif-item.level-warning.unread { border-right-color:#d97706; }
+    .notif-item.level-danger.unread { border-right-color:#dc2626; }
+    .notif-item.level-success.unread { border-right-color:#16a34a; }
+    .notif-item.level-info.unread { border-right-color:#0891b2; }
+
+    .notif-icon { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+    .notif-icon.info { background:#e0f2fe; color:#0369a1; }
+    .notif-icon.success { background:#dcfce7; color:#15803d; }
+    .notif-icon.warning { background:#fef3c7; color:#92400e; }
+    .notif-icon.danger { background:#fee2e2; color:#991b1b; }
+
+    .notif-body { flex:1; min-width:0; }
+    .notif-title { font-weight:800; color:#0f172a; font-size:.95rem; margin-bottom:4px; }
+    .notif-msg { color:#475569; font-size:.85rem; line-height:1.5; }
+    .notif-time { color:#94a3b8; font-size:.72rem; margin-top:6px; }
+    .notif-actions { display:flex; gap:6px; flex-shrink:0; }
+    .btn-act { padding:5px 12px; border-radius:6px; font-size:.75rem; font-weight:700; text-decoration:none; border:none; cursor:pointer; font-family:inherit; }
+    .btn-read { background:#dcfce7; color:#166534; }
+    .btn-read:hover { background:#bbf7d0; }
+    .btn-del { background:#fee2e2; color:#991b1b; }
+    .btn-del:hover { background:#fecaca; }
+    .btn-open { background:#dbeafe; color:#1e40af; }
+    .btn-open:hover { background:#bfdbfe; }
+
+    .unread-badge { background:#dc2626; color:#fff; padding:2px 8px; border-radius:10px; font-size:.7rem; font-weight:700; }
+
+    body.dark .stat-card, body.dark .filter-bar, body.dark .notif-item { background:#1e293b; border-color:#334155; color:#e2e8f0; }
+    body.dark .notif-item.unread { background:#0f172a; }
+    body.dark .notif-title { color:#e2e8f0; }
+    body.dark .notif-msg { color:#cbd5e1; }
+</style>
+
+<div style="max-width:1100px;margin:20px auto;padding:0 15px;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <h2 style="margin:0;color:#1e3a8a;">🔔 اعلان‌های من</h2>
+        <div style="display:flex;gap:8px;">
+            {% if stats.unread > 0 %}
+            <form method="post" action="{% url 'notification_mark_all_read' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm btn-pill" onclick="return confirm('همه اعلان‌ها خوانده‌شده شوند؟');">✅ خواندن همه</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- کارت‌های آماری -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="lbl">📋 کل اعلان‌ها</div>
+            <div class="val" style="color:#1e3a8a;">{{ stats.total }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="lbl">🔴 نخوانده</div>
+            <div class="val" style="color:#dc2626;">{{ stats.unread }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="lbl">✅ خوانده‌شده</div>
+            <div class="val" style="color:#16a34a;">{{ stats.read }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="lbl">⚠️ هشدار</div>
+            <div class="val" style="color:#d97706;">{{ stats.warning }}</div>
+        </div>
+    </div>
+
+    <!-- فیلترها -->
+    <form method="get" class="filter-bar">
+        <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
+            <div>
+                <label>جستجو</label>
+                <input type="text" name="q" value="{{ q }}" placeholder="عنوان یا متن..." style="min-width:200px;">
+            </div>
+            <div>
+                <label>وضعیت</label>
+                <select name="status">
+                    <option value="">— همه —</option>
+                    <option value="unread" {% if status_filter == 'unread' %}selected{% endif %}>🔴 نخوانده</option>
+                    <option value="read" {% if status_filter == 'read' %}selected{% endif %}>✅ خوانده</option>
+                </select>
+            </div>
+            <div>
+                <label>سطح</label>
+                <select name="level">
+                    <option value="">— همه —</option>
+                    <option value="info" {% if level_filter == 'info' %}selected{% endif %}>ℹ️ اطلاع</option>
+                    <option value="success" {% if level_filter == 'success' %}selected{% endif %}>✅ موفق</option>
+                    <option value="warning" {% if level_filter == 'warning' %}selected{% endif %}>⚠️ هشدار</option>
+                    <option value="danger" {% if level_filter == 'danger' %}selected{% endif %}>⛔ بحرانی</option>
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary btn-sm btn-pill">🔍 اعمال</button>
+                <a href="{% url 'notifications' %}" class="btn btn-outline btn-sm btn-pill">✖ پاک کردن</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- لیست اعلان‌ها -->
+    {% if page %}
+        {% for n in page %}
+        <div class="notif-item level-{{ n.level }} {% if not n.is_read %}unread{% endif %}">
+            <div class="notif-icon {{ n.level }}">
+                {% if n.level == 'success' %}✅
+                {% elif n.level == 'warning' %}⚠️
+                {% elif n.level == 'danger' %}⛔
+                {% else %}ℹ️{% endif %}
+            </div>
+            <div class="notif-body">
+                <div class="notif-title">
+                    {{ n.title }}
+                    {% if not n.is_read %}<span class="unread-badge">جدید</span>{% endif %}
+                </div>
+                {% if n.message %}
+                <div class="notif-msg">{{ n.message }}</div>
+                {% endif %}
+                <div class="notif-time">🕐 {{ n.created_at_shamsi }}</div>
+            </div>
+            <div class="notif-actions">
+                {% if n.link %}
+                <form method="post" action="{% url 'notification_mark_read' n.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-act btn-open">↗ باز کردن</button>
+                </form>
+                {% endif %}
+                {% if not n.is_read %}
+                <form method="post" action="{% url 'notification_mark_read' n.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-act btn-read">✓ خواندم</button>
+                </form>
+                {% endif %}
+                <a href="{% url 'notification_delete' n.id %}" class="btn-act btn-del" onclick="return confirm('حذف شود؟');">✖</a>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if page.has_other_pages %}
+        <div style="text-align:center;margin-top:20px;">
+            {% if page.has_previous %}
+                <a href="?page={{ page.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if level_filter %}&level={{ level_filter }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="btn btn-outline btn-sm btn-pill">← قبلی</a>
+            {% endif %}
+            <span style="margin:0 12px;color:#64748b;font-size:.85rem;">صفحه {{ page.number }} از {{ page.paginator.num_pages }}</span>
+            {% if page.has_next %}
+                <a href="?page={{ page.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if level_filter %}&level={{ level_filter }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="btn btn-outline btn-sm btn-pill">بعدی →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% else %}
+        <div style="text-align:center;padding:60px;color:#94a3b8;background:#fff;border-radius:12px;border:1px solid #e2e8f0;">
+            <div style="font-size:3rem;margin-bottom:14px;">📭</div>
+            <div style="font-size:1rem;font-weight:700;">اعلانی یافت نشد</div>
+            <div style="font-size:.82rem;margin-top:8px;">با تغییر فیلترها دوباره جستجو کنید</div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
